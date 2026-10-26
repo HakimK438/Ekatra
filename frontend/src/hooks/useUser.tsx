@@ -8,7 +8,7 @@ const write = (k: string, v: string | null) => { try { if (v === null) localStor
 
 export type TextSize = 'small' | 'normal' | 'large'
 // Root font size: every text size is in rem, so this scales the whole interface (and keeps chart tooltips aligned, unlike CSS zoom).
-const ROOT_SIZE: Record<TextSize, string> = { small: '92%', normal: '100%', large: '115%' }
+const ROOT_SIZE: Record<TextSize, string> = { small: '82%', normal: '90%', large: '105%' }
 
 export type AppUser = (typeof DEMO_USERS)[number]
 interface Ctx {
