@@ -1,0 +1,10 @@
+source_reference,received_on,channel,category,local_status,institution_name,permanent_id,current_id,complaint_ref,summary
+PGRC/2026/7101,2026-10-22,CPGRAMS,fee_refund,Registered on CPGRAMS,Mahanadi Institute of Technology,1-2201030,,,This row is fine
+PGRC/2026/7102,22-10-2026,CPGRAMS,fee_refund,Registered on CPGRAMS,Mahanadi Institute of Technology,1-2201030,,,Date written the wrong way round
+PGRC/2026/7103,2027-03-01,CPGRAMS,fee_refund,Registered on CPGRAMS,Mahanadi Institute of Technology,1-2201030,,,Date is in the future
+PGRC/2026/7104,2026-10-20,TELEPHONE,fee_refund,Registered on CPGRAMS,Mahanadi Institute of Technology,1-2201030,,,Unknown source
+PGRC/2026/7105,2026-10-20,CPGRAMS,parking,Registered on CPGRAMS,Mahanadi Institute of Technology,1-2201030,,,Unknown category
+PGRC/2026/7106,2026-10-20,CPGRAMS,fee_refund,Registered on CPGRAMS,Mahanadi Institute of Technology,12345,,,Permanent ID does not look right
+PGRC/2026/7107,2026-10-20,CPGRAMS,fee_refund,Registered on CPGRAMS,,,,,Institution name is empty
+,2026-10-20,CPGRAMS,fee_refund,Registered on CPGRAMS,Mahanadi Institute of Technology,1-2201030,,,Reference is empty
+PGRC/2026/7109,2026-10-20,CPGRAMS,fee_refund,Gone to the moon,Mahanadi Institute of Technology,1-2201030,,,Status word we do not know yet

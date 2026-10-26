@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+*.db
+.env
+.vercel/
+.pytest_cache/
+frontend/tsconfig.tsbuildinfo
+.local-backups/
+
+# Assistant working notes and tooling (not part of the product)
+CLAUDE.md
+.claude/
+graphify-out/
+
+# Source papers (PDF / Word / the original brief): kept locally, not published
+documents/source-documents/
+*.pdf
+*.docx

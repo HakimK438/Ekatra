@@ -1,0 +1,9 @@
+fastapi>=0.115
+uvicorn>=0.31
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+alembic>=1.13
+pydantic>=2.9
+PyJWT>=2.9
+bcrypt>=4.2
+python-multipart>=0.0.9

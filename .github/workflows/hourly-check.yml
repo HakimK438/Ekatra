@@ -1,0 +1,14 @@
+# Runs Ekatra's deadline and follow-up check every hour. (Vercel's free plan only allows one scheduled job per day.)
+# Set two repository secrets: EKATRA_API_URL (e.g. https://ekatra-api.vercel.app) and CRON_SECRET (same value as the API's CRON_SECRET).
+# GitHub pauses scheduled workflows after 60 days without repository activity; the app also runs the check itself when the dashboard is opened.
+name: hourly-check
+on:
+  schedule: [{ cron: "7 * * * *" }]
+  workflow_dispatch:
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the hourly check
+        run: |
+          curl --fail --silent --show-error --max-time 60 -X POST "${{ secrets.EKATRA_API_URL }}/api/v1/admin/sweep" -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}"

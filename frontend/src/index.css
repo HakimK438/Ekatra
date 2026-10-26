@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * "Civic ledger": a well-kept government register. Warm paper, navy ink, one confident blue,
+ * saffron for "needs a person", green for "confirmed", red only for problems.
+ * Space-separated RGB so Tailwind opacity modifiers work. Chart hex values mirror these in lib/chartColors.ts.
+ */
+:root {
+  --ink-950: 14 26 51;     /* #0E1A33 headings and body text */
+  --ink-900: 31 63 175;    /* #1F3FAF pressed, links on paper */
+  --ink-800: 30 45 87;     /* #1E2D57 sidebar */
+  --ink-700: 41 82 204;    /* #2952CC primary, "auto-verified" stamp */
+  --ink-500: 107 141 230;  /* #6B8DE6 focus ring, hatched bars */
+  --ink-100: 225 232 251;  /* #E1E8FB selected rows */
+  --ink-50: 241 244 253;   /* #F1F4FD soft fills */
+  --paper: 246 244 239;    /* #F6F4EF ledger paper canvas */
+  --surface: 255 255 255;
+  --line: 227 223 213;     /* #E3DFD5 */
+  --text: 27 37 64;        /* #1B2540 */
+  --muted: 93 99 113;      /* #5D6371, 5.4:1 on paper */
+  --stamp: 154 160 171;    /* #9AA0AB not reached */
+  --good: 15 122 85;       /* #0F7A55 confirmed by a person, disposed */
+  --good-soft: 226 243 235;
+  --tape: 194 53 63;       /* #C2353F problems only: overdue, rejected, high severity */
+  --tape-soft: 251 231 232;
+  --turmeric: 164 76 8;    /* #A44C08 saffron: needs a person, due soon (darkened for AA on its soft tint) */
+  --turmeric-soft: 253 241 220;
+  --unit-gr: 41 82 204;    /* grievance cell (PGRC) */
+  --unit-rb: 14 124 134;   /* Regulation Bureaus */
+  --unit-ro: 161 98 7;     /* Regional Offices */
+  --unit-other: 109 74 184;/* Legal and other cells */
+  --unit-none: 122 128 140;/* unmatched */
+}
+
+html { background: rgb(var(--paper)); -webkit-font-smoothing: antialiased; }
+body {
+  @apply bg-paper font-sans text-15 leading-relaxed text-text antialiased;
+  font-variant-numeric: tabular-nums;
+}
+h1, h2, h3 { text-wrap: balance; letter-spacing: -0.015em; }
+/* Tables: a quiet header band, hairline rows and a soft hover, the same on every screen. */
+table { border-collapse: collapse; }
+thead { background: rgb(var(--paper) / 0.75); }
+thead th { font-weight: 500; }
+tbody tr { transition: background-color 120ms; }
+tbody tr:hover { background: rgb(var(--ink-50) / 0.6); }
+:focus-visible { outline: 3px solid rgb(var(--ink-500) / 0.6); outline-offset: 2px; border-radius: 8px; }
+::selection { background: rgb(var(--ink-100)); }
+.skeleton { @apply animate-pulse rounded-chip bg-line/70; }
+.hatch { background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgb(255 255 255 / 0.45) 4px 6px); }
+.recharts-text { font-family: 'Noto Sans', sans-serif; }
+/* A stamp "presses in" when a person records something (only motion that explains a change). */
+@keyframes stamp-in { 0% { transform: scale(1.35) rotate(-6deg); opacity: 0; } 60% { transform: scale(0.96) rotate(-2deg); opacity: 1; } 100% { transform: scale(1) rotate(-2deg); } }
+.stamp-in { animation: stamp-in 260ms cubic-bezier(.2,.8,.2,1) both; }
+/* Motion that explains: content settles in, bars fill, a verdict pops once. All of it is off under "reduce motion" (rule below). */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise 320ms cubic-bezier(.2,.8,.2,1) both; }
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.grow-x { transform-origin: left; animation: grow-x 650ms cubic-bezier(.2,.8,.2,1) both; }
+@keyframes pop { 0% { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
+.pop { animation: pop 320ms cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ping-once { 0% { box-shadow: 0 0 0 0 rgb(var(--good) / .45); } 100% { box-shadow: 0 0 0 10px rgb(var(--good) / 0); } }
+.ping-once { animation: ping-once 900ms ease-out 1; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

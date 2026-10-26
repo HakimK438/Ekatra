@@ -1,0 +1,11 @@
+# FastAPI's Depends(...) in argument defaults is the documented pattern, so B008 is off.
+line-length = 260
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["B008", "E741"]
+
+[lint.per-file-ignores]
+"tests/*" = ["E501"]
+"scripts/*" = ["E501"]

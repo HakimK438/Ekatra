@@ -1,0 +1,18 @@
+[
+  {"key": "cpgramsDays", "group": "Time limits", "label": "CPGRAMS: time to dispose", "unit": "days", "default": 21, "min": 1, "max": 90, "verified": true, "editable": false, "basis": "DARPG guidelines, 23 Aug 2024. Locked because it is verified."},
+  {"key": "cpgramsInterimDay", "group": "Time limits", "label": "CPGRAMS: interim reply reminder", "unit": "day", "default": 18, "min": 1, "max": 90, "verified": false, "editable": true, "basis": "Prototype reminder: the guideline asks for an interim reply when more time is needed, with no fixed day (open question Q11)"},
+  {"key": null, "group": "Time limits", "label": "CPGRAMS: appeal window after closure", "unit": "days", "default": 30, "verified": true, "editable": false, "basis": "Government grievance guidelines"},
+  {"key": "defaultDays", "group": "Time limits", "label": "All other sources: time to dispose", "unit": "days", "default": 30, "min": 1, "max": 365, "verified": false, "editable": true, "basis": "Waiting for AICTE to set timelines (open question Q6)"},
+  {"key": "approachingPct", "group": "Time limits", "label": "“Due soon” starts at", "unit": "percent", "default": 0.75, "min": 0.1, "max": 0.99, "verified": false, "editable": true, "basis": "Prototype setting. Share of the time limit used."},
+  {"key": "escalateAfterOverdue", "group": "Raising late cases", "label": "Raise to the nodal officer after (senior management after twice this)", "unit": "days overdue", "default": 7, "min": 1, "max": 60, "verified": false, "editable": true, "basis": "Prototype setting"},
+  {"key": "unassignedDays", "group": "Raising late cases", "label": "New case with no officer: remind after", "unit": "days", "default": 3, "min": 1, "max": 30, "verified": false, "editable": true, "basis": "Prototype setting"},
+  {"key": "staleActionDays", "group": "Raising late cases", "label": "No recorded update: flag after", "unit": "days", "default": 14, "min": 1, "max": 120, "verified": false, "editable": true, "basis": "Prototype setting"},
+  {"key": "coordDueDays", "group": "Overlaps", "label": "Decision due after an overlap is found", "unit": "days", "default": 5, "min": 1, "max": 60, "verified": false, "editable": true, "basis": "Prototype setting"},
+  {"key": "coordSecondLevelDays", "group": "Overlaps", "label": "Second-level reminder", "unit": "days", "default": 10, "min": 1, "max": 90, "verified": false, "editable": true, "basis": "Prototype setting"},
+  {"key": "followUpDays", "group": "Overlaps", "label": "Follow-up task due after a decision", "unit": "days", "default": 3, "min": 1, "max": 60, "verified": false, "editable": true, "basis": "Prototype setting"},
+  {"key": "o3WindowDays", "group": "Overlaps", "label": "“Same kind of complaint” looks back", "unit": "days", "default": 180, "min": 7, "max": 730, "verified": false, "editable": true, "basis": "Used by rule O3"},
+  {"key": "o4NewWithinDays", "group": "Overlaps", "label": "A case counts as “new” for rule O4 for", "unit": "days", "default": 45, "min": 1, "max": 365, "verified": false, "editable": true, "basis": "Used by rule O4"},
+  {"key": "topN", "group": "Institution matching", "label": "Suggestions shown", "unit": "count", "default": 3, "min": 1, "max": 10, "verified": false, "editable": true, "basis": "Prototype setting"},
+  {"key": "suggestMinScore", "group": "Institution matching", "label": "Lowest similarity shown", "unit": "percent", "default": 0.6, "min": 0.3, "max": 0.95, "verified": false, "editable": true, "basis": "Prototype setting. Name matches are only ever suggestions."},
+  {"key": "staleHours", "group": "Data", "label": "A unit’s data counts as old after", "unit": "hours", "default": 24, "min": 1, "max": 336, "verified": false, "editable": true, "basis": "Prototype setting"}
+]
