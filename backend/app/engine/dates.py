@@ -6,8 +6,10 @@ from __future__ import annotations
 
 import math
 from datetime import date, datetime, timedelta
+from functools import lru_cache
 
 
+@lru_cache(maxsize=8192)  # a few thousand distinct dates are parsed hundreds of thousands of times per request
 def to_date(s: str) -> date:
     return date.fromisoformat(s[:10])
 
@@ -16,10 +18,12 @@ def iso(d: date) -> str:
     return d.isoformat()
 
 
+@lru_cache(maxsize=65536)
 def days_between(a: str, b: str) -> int:
     return (to_date(b) - to_date(a)).days
 
 
+@lru_cache(maxsize=65536)
 def add_days(s: str, n: int) -> str:
     return iso(to_date(s) + timedelta(days=n))
 

@@ -30,7 +30,7 @@ DEMO_USERS = [
     ("u4", "pnair", "Pradeep Nair", "dealing_officer", "PGRC", "Dealing Officer — Public Grievance Redressal Cell (PGRC)"),
     ("u5", "rdas", "Ritu Das", "senior_management", None, "Senior Management (view only)"),
     ("u6", "kmenon", "Kavya Menon", "data_steward", None, "Data Steward — Imports and Institution Records"),
-    ("u7", "ishaikh", "Imran Shaikh", "admin", None, "System Administrator — Settings and Users"),
+    ("u7", "vjoshi", "Vikram Joshi", "admin", None, "System Administrator — Settings and Users"),
 ]
 
 EVENT_ACTION = {
@@ -39,7 +39,7 @@ EVENT_ACTION = {
     "linked": "Decision recorded", "match_resolved": "Institution matched",
 }
 
-CLEAR_ORDER = [m.CaseAlert, m.JobRun, m.Task, m.Decision, m.RejectedSuggestion, m.AlertView, m.ImportBatch, m.StatusMapping, m.SourceSync,
+CLEAR_ORDER = [m.Demand, m.CaseAlert, m.JobRun, m.Task, m.Decision, m.RejectedSuggestion, m.AlertView, m.ImportBatch, m.StatusMapping, m.SourceSync,
                m.AuditEvent, m.Case, m.Institution, m.User, m.Unit, m.AppState]
 
 
@@ -72,6 +72,7 @@ def seed(db: Session, today: str | None = None) -> dict:
     db.flush()
 
     cases = data["cases"]
+    cases.append(repeat_case(cases))
     for c in cases:
         for e in c["events"]:
             e["at"] = shift(e["at"])
@@ -87,6 +88,8 @@ def seed(db: Session, today: str | None = None) -> dict:
             events=c["events"], disposal_type=c.get("disposalType"), documents=c.get("documents") or [],
             scheduled=({**c["scheduled"], "on": shift(c["scheduled"]["on"])} if c.get("scheduled") else None),
         ))
+    db.flush()
+    seed_requests(db, cases, data["institutions"], today, shift)
     for unit, words in data["statusMap"].items():
         for word, stage in words.items():
             db.add(m.StatusMapping(unit=unit, word=word, stage=stage))
@@ -124,3 +127,40 @@ def seed(db: Session, today: str | None = None) -> dict:
     db.flush()
     triggers.install(db.connection())
     return {"cases": len(cases), "institutions": len(data["institutions"]), "today": today, "audit": seq}
+
+
+def seed_requests(db: Session, cases: list[dict], insts: list[dict], today: str, shift) -> None:
+    """A few SYNTHETIC letters already sent to institutions, so the requests register and its checks have something to show.
+    Sahyadri: RB-WR's show-cause notice asked for the faculty list before its SHC hearing (the demo PGRC letter then asks again)."""
+    inst = {i["name"]: i["id"] for i in insts}
+
+    def case_for(iid: str, unit: str) -> dict | None:
+        return next((c for c in cases if c.get("institutionId") == iid and c["ownerUnit"] == unit), None)
+
+    rows = [
+        ("Sahyadri Institute of Technology", "RB-WR", "show_cause", "RB-WR/SCN/2026/0917", -15, ["faculty_list", "salary_records", "affidavit"], 0, "open", None),
+        ("Malnad Polytechnic", "RB-SWR", "information_request", "RB-SWR/2026/2984", -24, ["compliance_report", "accounts"], -9, "open", None),
+        ("Gomti College of Engineering", "PGRC", "information_request", "PGRC/2026/1003", -12, ["fee_records", "reply"], 3, "answered", -4),
+    ]
+    for name, unit, kind, ref, ago, items, due, state, ans in rows:
+        iid = inst.get(name)
+        if not iid:
+            continue
+        c = case_for(iid, unit)
+        hearing = c["scheduled"] if c and c.get("scheduled") else None
+        db.add(m.Demand(institution_id=iid, unit=unit, case_id=c["id"] if c else None, kind=kind, letter_ref=ref, letter_date=add_days(today, ago),
+                        items=items, other_items=[], due_on=add_days(today, due), hearing_on=shift(hearing["on"]) if hearing else None,
+                        hearing_what=hearing["what"] if hearing else None, state=state, answered_on=add_days(today, ans) if ans is not None else None,
+                        note="", source="form", letter_sha256=None, by=f"Synthetic demo record, {unit}", at=f"{add_days(today, ago)}T10:00"))
+
+
+def repeat_case(cases: list[dict]) -> dict:
+    """One SYNTHETIC complaint that comes back 8 days after its earlier case was closed, so the repeat radar has a real example."""
+    p = next(c for c in cases if c["id"] == "c108")
+    n = len(cases) + 1
+    return {**p, "id": f"c{n}", "uid": f"CC-2026-{n:06d}", "sourceRef": f"PGRC/2026/{1000 + n}", "sourceComplaintRef": "DARPG/E/2026/0977", "channel": "CPGRAMS",
+            "receivedOn": "2026-10-17", "summary": "Same complaint again: built-up area still below the approved norm after the earlier reply.",
+            "localStatus": "Under examination", "lifecycle": "under_examination", "lastAction": "Case registered", "lastActionOn": "2026-10-17",
+            "nextAction": "Examine the earlier reply and the new complaint", "disposalType": None, "documents": [], "scheduled": None,
+            "sensitive": {"complainant": f"Synthetic Complainant {n}", "narrative": "Synthetic narrative, restricted to the owning unit."},
+            "events": [{"type": "created", "at": "2026-10-17", "actor": "PGRC", "text": "Case registered in PGRC"}]}

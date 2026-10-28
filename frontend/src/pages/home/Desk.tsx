@@ -1,6 +1,7 @@
 // The officer's desk. It asks one question: where are two units about to act on the same institution without knowing it?
 // Then what is going late, then what is only being watched. Dense rows, every row naming the other unit and the date.
 import { useQuery } from '@tanstack/react-query'
+import WorkCells from '../../components/WorkCells'
 import { Link } from 'react-router-dom'
 import { AlertTriangle } from 'lucide-react'
 import clsx from 'clsx'
@@ -59,6 +60,7 @@ export default function Desk() {
       <Hero s={sum.data} alerts={ov.data.open} today={today} />
       <KpiCards s={sum.data} />
       <DashCharts />
+      <WorkCells />
 
 
       {decider ? (

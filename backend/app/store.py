@@ -1,19 +1,51 @@
 """Loading records into the plain dicts the engines use, and saving them back.
 
-Each request loads the whole (small) dataset into a `State`, runs the pure engines on it and writes only what changed.
+Each request runs the pure engines on the whole dataset in a `State` and writes only what changed. Loading thousands of
+cases from the database on every request is the slow part, so the loaded cases and institutions are kept in memory and
+reused while the `data_version` stamp in app_state is unchanged. Any flush that touches a case or an institution writes a
+new random stamp in the same transaction, so every server process sees the change on its next request.
 """
 from __future__ import annotations
 
-from copy import deepcopy
+import json
+import uuid
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import event, select
 from sqlalchemy.orm import Session
 
 from . import models as m
 from .engine import rules
 from .engine.dates import add_days, days_between
 from .engine.logic import SETTINGS, detect_overlaps, is_active
+
+VERSION_KEY = "data_version"
+_cache: dict[str, Any] = {}  # {"token", "cases", "insts", "alerts": {(today, rules): [...]}} for the latest stamp only
+
+
+def deepcopy(x: Any) -> Any:
+    """A private copy of a JSON value, so editing it never changes a loaded row or the shared cache. Several times faster than copy.deepcopy."""
+    if type(x) is dict:
+        return {k: deepcopy(v) for k, v in x.items()}
+    if type(x) is list:
+        return [deepcopy(v) for v in x]
+    return x
+
+
+@event.listens_for(Session, "before_flush")
+def _stamp_change(session: Session, _ctx: Any, _instances: Any) -> None:
+    if any(isinstance(o, (m.Case, m.Institution)) for o in (*session.new, *session.dirty, *session.deleted)):
+        with session.no_autoflush:
+            r = session.get(m.AppState, VERSION_KEY)
+            if r:
+                r.value = uuid.uuid4().hex
+            else:
+                session.add(m.AppState(key=VERSION_KEY, value=uuid.uuid4().hex))
+
+
+def data_token(db: Session) -> str | None:
+    r = db.get(m.AppState, VERSION_KEY)
+    return r.value if r else None
 
 
 def case_to_dict(r: m.Case) -> dict:
@@ -82,10 +114,18 @@ class State:
         self.db, self.today = db, today
         rules.apply(get_json(db, "rule_overrides", {}))  # administrators' changes, so every request sees the same rules
         self.units = [unit_to_dict(u) for u in db.scalars(select(m.Unit)).all()]
-        self.insts = [inst_to_dict(i) for i in db.scalars(select(m.Institution).order_by(m.Institution.id)).all()]
+        self.token = data_token(db)
+        if not self.token or _cache.get("token") != self.token:
+            insts = [inst_to_dict(i) for i in db.scalars(select(m.Institution).order_by(m.Institution.id)).all()]
+            cases = sorted((case_to_dict(r) for r in db.scalars(select(m.Case)).all()), key=lambda c: int(c["id"][1:]))
+            _cache.clear()
+            if self.token:
+                _cache.update(token=self.token, insts=insts, cases=cases, alerts={})
+            self.insts, self.cases = deepcopy(insts), deepcopy(cases)
+        else:
+            self.insts, self.cases = deepcopy(_cache["insts"]), deepcopy(_cache["cases"])
         self.inst_by = {i["id"]: i for i in self.insts}
-        self._case_rows = {r.id: r for r in db.scalars(select(m.Case)).all()}
-        self.cases = sorted((case_to_dict(r) for r in self._case_rows.values()), key=lambda c: int(c["id"][1:]))
+        self._case_rows: dict[str, m.Case] = {}  # rows are fetched only when a case is saved
         self.case_by = {c["id"]: c for c in self.cases}
         self.decision_rows = db.scalars(select(m.Decision).order_by(m.Decision.id)).all()
         self.decisions = [decision_to_dict(r) for r in self.decision_rows]
@@ -94,15 +134,24 @@ class State:
             self.rejected.setdefault(r.case_id, []).append(r.institution_id)
         self.seen = {r.alert_id for r in db.scalars(select(m.AlertView)).all()}
         self._alerts: list[dict] | None = None
+        self._changed = False
 
     # ----- overlaps -----
     def alerts(self) -> list[dict]:
         if self._alerts is None:
-            self._alerts = detect_overlaps(self.cases, self.units, self.today)
+            key = (self.today, json.dumps(SETTINGS, sort_keys=True))
+            shared = _cache.get("alerts") if not self._changed and _cache.get("token") == self.token else None
+            if shared is not None and key in shared:
+                self._alerts = deepcopy(shared[key])
+            else:
+                self._alerts = detect_overlaps(self.cases, self.units, self.today)
+                if shared is not None:
+                    shared[key] = deepcopy(self._alerts)
         return self._alerts
 
     def invalidate(self) -> None:
         self._alerts = None
+        self._changed = True
         self.case_by = {c["id"]: c for c in self.cases}
 
     def known_alerts(self) -> list[dict]:
@@ -167,17 +216,18 @@ class State:
 
     # ----- saving -----
     def save_case(self, c: dict) -> None:
-        apply_case(self._case_rows[c["id"]], c)
+        self._changed = True
+        row = self._case_rows.get(c["id"]) or self.db.get(m.Case, c["id"])
+        assert row is not None
+        apply_case(row, c)
 
 
 def get_json(db: Session, key: str, default: Any = None) -> Any:
-    import json
     r = db.get(m.AppState, key)
     return json.loads(r.value) if r else default
 
 
 def set_json(db: Session, key: str, value: Any) -> None:
-    import json
     r = db.get(m.AppState, key)
     if r:
         r.value = json.dumps(value)

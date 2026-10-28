@@ -7,6 +7,7 @@ import { AlertTriangle, ArrowRightLeft, CalendarPlus, CheckCheck, Copy, External
 import clsx from 'clsx'
 import { api, EXTRA } from '../lib/api'
 import { CHANNEL_LABEL, DECISION_LABEL, DISPOSAL_LABEL, STAGE_LABEL, categoryLabel } from '../lib/labels'
+import { ClosureFacts } from '../components/WorkBits'
 import { SETTINGS, addDays } from '../lib/logic'
 import { tagEvidence } from '../lib/proof'
 import { nextStepFor, preActionCheck, type LaneLite } from '../lib/solution'
@@ -101,6 +102,7 @@ function ActionDialog({ kind, onClose, c, onDone }: { kind: ActionKind | null; o
         {kind !== 'schedule' && <label className="block text-13 font-medium text-text">{kind === 'record' ? 'What was done' : kind === 'reply' ? 'What should the institution send?' : 'Reason'}
           <textarea rows={3} className={fieldCls} value={text} onChange={(e) => setText(e.target.value)} required
             placeholder={kind === 'record' ? 'For example: Called the institution; Principal promised the fee refund by 30 Oct.' : kind === 'reply' ? 'For example: Your reply to the notice dated 10 Oct, with the faculty list signed by the Principal.' : 'One or two sentences.'} /></label>}
+        {kind === 'close' && <ClosureFacts caseId={c.id} reason={text} disposalType={type} />}
         {kind === 'record' && <label className="block text-13 font-medium text-text">What happens next (optional)<input className={fieldCls} value={next} onChange={(e) => setNext(e.target.value)} placeholder="For example: Check the refund on 30 Oct" /></label>}
         {kind === 'reply' && <label className="block text-13 font-medium text-text">Reply due by<input type="date" min={api.today} className={fieldCls} value={due} onChange={(e) => setDue(e.target.value)} /></label>}
         {m.isError && <ErrorBox error={m.error} />}

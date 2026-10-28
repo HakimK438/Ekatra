@@ -201,4 +201,30 @@ class AppState(Base):
     value: Mapped[str] = mapped_column(Text)
 
 
+class Demand(Base):
+    """What a unit asked an institution to send or do, by when (read from a letter or typed in).
+
+    Only facts are kept: the letter's text is not stored (it may name a complainant), only its SHA-256 so the same letter is not recorded twice."""
+    __tablename__ = "demands"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    institution_id: Mapped[str] = mapped_column(String(20), ForeignKey("institutions.id"), index=True)
+    unit: Mapped[str] = mapped_column(String(20), ForeignKey("units.code"), index=True)
+    case_id: Mapped[str | None] = mapped_column(String(20), ForeignKey("cases.id"), nullable=True)
+    kind: Mapped[str] = mapped_column(String(30))  # show_cause | hearing_notice | inspection | information_request | reminder | warning | closure | other
+    letter_ref: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    letter_date: Mapped[str] = mapped_column(String(10))
+    items: Mapped[list] = mapped_column(JSON, default=list)  # item keys, see engine/letters.ITEMS
+    other_items: Mapped[list] = mapped_column(JSON, default=list)  # asks in the letter's own words that match no known item
+    due_on: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    hearing_on: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    hearing_what: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    state: Mapped[str] = mapped_column(String(12), default="open")  # open | answered | withdrawn
+    answered_on: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    note: Mapped[str] = mapped_column(Text, default="")
+    source: Mapped[str] = mapped_column(String(10), default="letter")  # letter | form
+    letter_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    by: Mapped[str] = mapped_column(String(160))
+    at: Mapped[str] = mapped_column(String(30))
+
+
 __all__ = ["Float"]

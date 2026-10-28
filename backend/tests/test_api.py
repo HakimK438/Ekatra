@@ -36,7 +36,7 @@ def test_sensitive_details_only_for_the_owning_unit_and_each_view_is_audited(as_
     owner = as_user("arao")  # PGRC; case c2 belongs to PGRC
     assert owner.get("/api/v1/cases/c2/sensitive").status_code == 200
     assert as_user("siyer").get("/api/v1/cases/c2/sensitive").status_code == 403
-    assert as_user("ishaikh").get("/api/v1/cases/c2/sensitive").status_code == 403
+    assert as_user("vjoshi").get("/api/v1/cases/c2/sensitive").status_code == 403
     n = db.execute(text("select count(*) from audit_events where action='Complainant details viewed'")).scalar()
     assert n == 1
 
@@ -150,7 +150,7 @@ def test_transfers_are_never_counted_as_disposals(as_user):
 
 
 def test_audit_chain_verifies_detects_tampering_and_blocks_edits(as_user, db):
-    admin = as_user("ishaikh")
+    admin = as_user("vjoshi")
     assert admin.get("/api/v1/audit").json()["check"]["ok"]
     try:
         db.execute(text("update audit_events set details='tampered' where seq=1"))
@@ -172,9 +172,9 @@ def test_consistent_error_format_and_empty_filters(as_user):
 
 def test_reset_restores_the_demo_data_and_is_admin_only(as_user):
     assert as_user("arao").post("/api/v1/admin/reset").status_code == 403
-    admin = as_user("ishaikh")
+    admin = as_user("vjoshi")
     assert admin.post("/api/v1/admin/reset").json()["ok"]
-    assert admin.get("/api/v1/cases").json()["total"] == len(json.load(open("scripts/seed_data.json", encoding="utf-8"))["cases"])
+    assert admin.get("/api/v1/cases").json()["total"] == len(json.load(open("scripts/seed_data.json", encoding="utf-8"))["cases"]) + 1  # plus the repeat complaint added by seed.repeat_case
 
 
 def test_overlap_path_encoding_roundtrip(as_user):

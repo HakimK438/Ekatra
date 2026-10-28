@@ -48,7 +48,7 @@ npm run dev                          # http://localhost:5173  (the dev server fo
 ```
 
 Sign in with a demo account on the first screen (password `demo`). Accounts: `arao` (PGRC nodal officer), `siyer` (RB-WR nodal officer),
-`mkhan` (coordinator), `pnair` (PGRC dealing officer), `rdas` (senior management, view only), `kmenon` (data steward), `ishaikh` (administrator).
+`mkhan` (coordinator), `pnair` (PGRC dealing officer), `rdas` (senior management, view only), `kmenon` (data steward), `vjoshi` (administrator).
 
 ### Tests and the demo journey
 
@@ -77,7 +77,7 @@ Three free services, no card needed for the core path: **Neon** (database), **Ve
    `.github/workflows/hourly-check.yml` then runs every hour. (The app also runs the check itself when the dashboard opens and it is over an hour old.)
 6. Verify: `python -m scripts.run_demo_scenario --base-url https://<your-website>` should print `All steps passed.`
 
-**Reset the demo data** at any time: sign in as `ishaikh` and use *Reset demo data* in the automation panel, or `python -m scripts.init_db --reset`.
+**Reset the demo data** at any time: sign in as `vjoshi` and use *Reset demo data* in the automation panel, or `python -m scripts.init_db --reset`.
 
 ### Free-tier limits to know
 

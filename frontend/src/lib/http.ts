@@ -8,7 +8,7 @@ import type { Case, CaseFilters, Decision, DemoUser, DisposalType, ImportRow, Li
 
 const BASE = '/api/v1'
 
-async function call<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
+export async function call<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
   let res: Response
   try {
     res = await fetch(BASE + path, {

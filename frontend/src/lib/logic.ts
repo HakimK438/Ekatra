@@ -5,7 +5,7 @@ import type {
 import { categoryLabel } from './labels'
 import RULES from './rules.json'
 
-export type RuleKey = 'cpgramsDays' | 'cpgramsInterimDay' | 'defaultDays' | 'approachingPct' | 'escalateAfterOverdue' | 'unassignedDays' | 'staleActionDays'
+export type RuleKey = 'cpgramsDays' | 'cpgramsInterimDay' | 'defaultDays' | 'approachingPct' | 'escalateAfterOverdue' | 'unassignedDays' | 'staleActionDays' | 'demandLookbackDays' | 'demandNearDays'
   | 'coordDueDays' | 'coordSecondLevelDays' | 'followUpDays' | 'o3WindowDays' | 'o4NewWithinDays' | 'topN' | 'suggestMinScore' | 'staleHours'
 export interface Rule {
   key: RuleKey | null; group: string; label: string; unit: string; default: number; min?: number; max?: number

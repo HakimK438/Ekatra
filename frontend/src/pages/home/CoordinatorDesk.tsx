@@ -1,5 +1,6 @@
 // The coordinator's desk: every overlap waiting for a decision, the name checks holding up overlap checks, and what has been raised.
 import { useQuery } from '@tanstack/react-query'
+import WorkCells from '../../components/WorkCells'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { useUser } from '../../hooks/useUser'
@@ -36,6 +37,7 @@ export default function CoordinatorDesk() {
       <Hero s={sum.data} alerts={ov.data.open} today={today} />
       <KpiCards s={sum.data} />
       <DashCharts />
+      <WorkCells />
 
 
       <Section n={1} title="Decide" count={decide.length} tone="amber" hint="Every clash waiting for a decision, soonest decision date first. Late ones are marked.">

@@ -14,5 +14,7 @@
   {"key": "o4NewWithinDays", "group": "Overlaps", "label": "A case counts as “new” for rule O4 for", "unit": "days", "default": 45, "min": 1, "max": 365, "verified": false, "editable": true, "basis": "Used by rule O4"},
   {"key": "topN", "group": "Institution matching", "label": "Suggestions shown", "unit": "count", "default": 3, "min": 1, "max": 10, "verified": false, "editable": true, "basis": "Prototype setting"},
   {"key": "suggestMinScore", "group": "Institution matching", "label": "Lowest similarity shown", "unit": "percent", "default": 0.6, "min": 0.3, "max": 0.95, "verified": false, "editable": true, "basis": "Prototype setting. Name matches are only ever suggestions."},
+  {"key": "demandLookbackDays", "group": "Requests to institutions", "label": "A document asked for again: look back", "unit": "days", "default": 120, "min": 7, "max": 730, "verified": false, "editable": true, "basis": "Prototype setting. Used to show that another unit already asked the institution for the same document."},
+  {"key": "demandNearDays", "group": "Requests to institutions", "label": "A reply due this close to another unit’s hearing or visit is shown", "unit": "days", "default": 7, "min": 1, "max": 60, "verified": false, "editable": true, "basis": "Prototype setting"},
   {"key": "staleHours", "group": "Data", "label": "A unit’s data counts as old after", "unit": "hours", "default": 24, "min": 1, "max": 336, "verified": false, "editable": true, "basis": "Prototype setting"}
 ]

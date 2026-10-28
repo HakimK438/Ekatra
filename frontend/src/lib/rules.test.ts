@@ -4,7 +4,7 @@ import { RULE_DEFAULTS, SETTINGS, deadlineFor } from './logic'
 import { applyRules, display, ruleByKey, ruleItems, validateRules } from './rules'
 import type { Case, DemoUser } from './types'
 
-const admin: DemoUser = { id: 'u7', name: 'Imran Shaikh', role: 'admin' }
+const admin: DemoUser = { id: 'u7', name: 'Vikram Joshi', role: 'admin' }
 const officer: DemoUser = { id: 'u1', name: 'Anjali Rao', role: 'nodal_officer', unit: 'PGRC' }
 const other = { channel: 'EMAIL_POST', receivedOn: '2026-10-01', lifecycle: 'under_examination' } as Case
 afterEach(() => applyRules({}))

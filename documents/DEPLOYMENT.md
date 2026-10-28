@@ -200,7 +200,7 @@ If step 2 shows "Mock data service", `VITE_API_MODE` was not set on the website 
 | Import of a big file fails | Vercel limits a request to about 4.5 MB | Files are capped at 2,000 rows. Split the file |
 | "RB-SWR silent" warning in the data-freshness strip | This is on purpose in the demo | One unit is set to look silent to show the warning. Turn off with `SIMULATE_SOURCE_FEEDS=false`, or change `SILENT_UNITS` |
 
-To re-run the migrations later (after a code update that adds one): set the same two environment variables as in step 4 and run `python -m alembic upgrade head` from the `backend` folder. To wipe and reload the demonstration data: `python -m scripts.init_db --reset`, or sign in as `ishaikh` and use *Reset demo data*.
+To re-run the migrations later (after a code update that adds one): set the same two environment variables as in step 4 and run `python -m alembic upgrade head` from the `backend` folder. To wipe and reload the demonstration data: `python -m scripts.init_db --reset`, or sign in as `vjoshi` and use *Reset demo data*.
 
 ---
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { AlarmClock, BarChart3, Bell, Building2, CalendarDays, CircleHelp, FilePlus2, FileUp, Files, GitMerge, HeartPulse, Home, Inbox, LineChart, Link2, LogOut, Menu, PlayCircle, Route, ScrollText, ShieldCheck, SlidersHorizontal, Users, X, type LucideIcon } from 'lucide-react'
+import { AlarmClock, BarChart3, Mailbox, Bell, Building2, CalendarDays, CircleHelp, FilePlus2, FileUp, Files, GitMerge, HeartPulse, Home, Inbox, LineChart, Link2, LogOut, Menu, PlayCircle, Route, ScrollText, ShieldCheck, SlidersHorizontal, Users, X, type LucideIcon } from 'lucide-react'
 import type { Role } from '../lib/types'
 import clsx from 'clsx'
 import { api, EXTRA } from '../lib/api'
@@ -24,6 +24,7 @@ const GROUPS: { heading?: string; items: NavItem[] }[] = [
     { to: '/overlaps', label: 'Clashes', icon: GitMerge, count: 'overlaps' as const, roles: READ },
     { to: '/calendar', label: 'Calendar', icon: CalendarDays, roles: READ },
     { to: '/institutions', label: 'Institutions', icon: Building2, roles: [...READ, 'data_steward'] },
+    ...(!EXTRA ? [{ to: '/requests', label: 'Letters', icon: Mailbox, roles: [...READ, 'data_steward'] as Role[] }] : []),
     { to: '/cases', label: 'Cases', icon: Files, end: true, roles: [...READ, 'data_steward'] },
     { to: '/deadlines', label: 'Deadlines', icon: AlarmClock, roles: READ },
     { to: '/reports', label: 'Reports', icon: BarChart3, roles: ['coordinator', 'senior_management'] },
@@ -47,14 +48,21 @@ const GROUPS: { heading?: string; items: NavItem[] }[] = [
 ]
 // Tabs shown at the top of a place, so one idea is one place in the menu.
 const TABS: { match: string[]; items: { to: string; label: string; roles?: Role[] }[] }[] = [
+  ...(!EXTRA ? [
+    { match: ['/', '/my-day', '/team'], items: [{ to: '/', label: 'Dashboard' }, { to: '/my-day', label: 'My day' }, { to: '/team', label: 'Who is working on what', roles: [...READ, 'data_steward'] as Role[] }] },
+    { match: ['/requests', '/letters'], items: [{ to: '/requests', label: 'All letters' }, { to: '/letters', label: 'Read a new letter', roles: [...ACTS, 'data_steward'] as Role[] }] },
+    { match: ['/settings', '/policy'], items: [{ to: '/settings', label: 'Settings' }, { to: '/policy', label: 'Rule changes', roles: ['admin', 'coordinator', 'senior_management'] as Role[] }] },
+  ] : []),
   { match: ['/overlaps', '/check'], items: [
     { to: '/overlaps', label: 'Clashes' },
     { to: '/check', label: 'Before you act', roles: ACTS },
   ] },
-  { match: ['/cases', '/import'], items: [
+  { match: ['/cases', '/import', '/radar', '/allocation'], items: [
     { to: '/cases', label: 'All cases' },
     { to: '/cases/new', label: 'Register a case', roles: OFFICER },
     { to: '/import', label: 'Import records', roles: [...OFFICER, 'data_steward', 'coordinator'] },
+    ...(!EXTRA ? [{ to: '/allocation', label: 'Assign work', roles: ['nodal_officer', 'coordinator', 'senior_management'] as Role[] }] : []),
+    ...(!EXTRA ? [{ to: '/radar', label: 'Came back or repeating', roles: READ }] : []),
   ] },
   { match: ['/reports', '/management', '/audit'], items: [
     { to: '/reports', label: 'Reports', roles: ['coordinator', 'senior_management'] },
@@ -63,7 +71,7 @@ const TABS: { match: string[]; items: { to: string; label: string; roles?: Role[
   ] },
 ]
 const HOME_LABEL: Record<Role, string> = { dealing_officer: 'Dashboard', nodal_officer: 'Dashboard', coordinator: 'Dashboard', data_steward: 'Dashboard', senior_management: 'Overview', admin: 'System' }
-const CRUMB: Record<string, string> = { '': 'Dashboard', management: 'Management view', calendar: 'Calendar', demo: 'Live demo', inbox: 'Inbox', cases: 'Cases', institutions: 'Institutions', overlaps: 'Clashes', matching: 'Same college?', deadlines: 'Deadlines', import: 'Import', 'data-health': 'Data health', reports: 'Reports', settings: 'Settings', audit: 'Audit log', 'how-it-works': 'Proof it works', check: 'Before you act', flow: 'How Ekatra works' }
+const CRUMB: Record<string, string> = { '': 'Dashboard', management: 'Management view', calendar: 'Calendar', demo: 'Live demo', inbox: 'Inbox', cases: 'Cases', institutions: 'Institutions', overlaps: 'Clashes', matching: 'Same college?', deadlines: 'Deadlines', import: 'Import', 'data-health': 'Data health', reports: 'Reports', settings: 'Settings', audit: 'Audit log', 'how-it-works': 'Proof it works', check: 'Before you act', flow: 'How Ekatra works', letters: 'Read a new letter', requests: 'Letters', policy: 'Rule changes', radar: 'Came back or repeating', allocation: 'Assign work', team: 'Who is working on what', 'my-day': 'My day' }
 
 export default function Shell() {
   const { user, signOut, textSize, setTextSize } = useSession()

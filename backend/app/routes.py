@@ -9,6 +9,10 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from . import allocation as A
+from . import control as C
+from . import digest as D
+from . import letters_service as R
 from . import models as m
 from . import services as S
 from .audit import verify_chain
@@ -424,6 +428,139 @@ def report(type: str = "workload", period: str = "monthly", unit: str | None = N
 def report_export(type: str = "workload", period: str = "monthly", unit: str | None = None, region: str | None = None,
                   st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
     return S.export_report(st, type, period, unit, region, u)
+
+
+@router.get("/reports/changes")
+def report_changes(days: int = 7, st: State = Depends(get_state), _: dict = Depends(current_user)) -> dict:
+    return D.changes(st, days)
+
+
+@router.get("/digest")
+def digest(st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return D.digest(st, u)
+
+
+# ---------------------------------------------------------------- letters and requests to institutions
+class LetterBody(BaseModel):
+    text: str
+
+
+@router.post("/letters/read")
+def letter_read(b: LetterBody, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return R.read(st, b.text, u)
+
+
+class RequestBody(BaseModel):
+    institutionId: str
+    unit: str | None = None
+    caseId: str | None = None
+    kind: str = "information_request"
+    letterRef: str | None = None
+    letterDate: str
+    items: list[str] = []
+    otherItems: list[str] = []
+    dueOn: str | None = None
+    hearingOn: str | None = None
+    hearingWhat: str | None = None
+    text: str | None = None  # only hashed, so the same letter is not recorded twice; never stored
+
+
+@router.get("/requests")
+def requests_list(institutionId: str | None = None, unit: str | None = None, state: str | None = None,
+                  st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return R.listing(st, u, institutionId, unit, state)
+
+
+@router.post("/requests")
+def request_create(b: RequestBody, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return R.create(st, b.model_dump(), u)
+
+
+class AnsweredBody(BaseModel):
+    on: str | None = None
+    note: str = ""
+
+
+@router.post("/requests/{rid}/answered")
+def request_answered(rid: int, b: AnsweredBody, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return R.answered(st, rid, b.on, b.note, u)
+
+
+class ReasonBody(BaseModel):
+    reason: str = ""
+
+
+@router.post("/requests/{rid}/withdraw")
+def request_withdraw(rid: int, b: ReasonBody, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return R.withdraw(st, rid, b.reason, u)
+
+
+# ---------------------------------------------------------------- policy console, closure check, repeat radar
+class PolicyBody(BaseModel):
+    values: dict[str, float] = {}
+    reason: str = ""
+    effective: str | None = None
+
+
+@router.get("/policy")
+def policy(st: State = Depends(get_state), _: dict = Depends(require_roles("admin", "coordinator", "senior_management"))) -> dict:
+    return C.policy_view(st)
+
+
+@router.post("/policy/preview")
+def policy_preview(b: PolicyBody, st: State = Depends(get_state), _: dict = Depends(require_roles("admin", "coordinator", "senior_management"))) -> dict:
+    return C.preview(st, b.values)
+
+
+@router.post("/policy/proposals")
+def policy_propose(b: PolicyBody, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return C.propose(st, u, b.values, b.reason, b.effective)
+
+
+class ProposalDecision(BaseModel):
+    approve: bool
+    note: str = ""
+
+
+@router.post("/policy/proposals/{pid}/decide")
+def policy_decide(pid: int, b: ProposalDecision, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return C.decide_proposal(st, u, pid, b.approve, b.note)
+
+
+class ClosureBody(BaseModel):
+    reason: str = ""
+    disposalType: str | None = None
+
+
+@router.post("/cases/{cid}/closure-check")
+def closure_check(cid: str, b: ClosureBody, st: State = Depends(get_state), _: dict = Depends(current_user)) -> dict:
+    return C.closure_check(st, cid, b.reason, b.disposalType)
+
+
+@router.get("/radar")
+def radar(st: State = Depends(get_state), _: dict = Depends(current_user)) -> dict:
+    return C.radar(st)
+
+
+# ---------------------------------------------------------------- marking work to officers
+@router.get("/allocation")
+def allocation(unit: str | None = None, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return A.board(st, u, unit)
+
+
+class MarkBody(BaseModel):
+    officer: str
+    note: str = ""
+
+
+@router.get("/people")
+def people(q: str | None = None, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return A.who_works(st, u, q)
+
+
+@router.post("/cases/{cid}/mark")
+def mark_case(cid: str, b: MarkBody, st: State = Depends(get_state), u: dict = Depends(current_user)) -> dict:
+    return A.mark(st, cid, b.officer, b.note, u)
 
 
 @router.get("/health")

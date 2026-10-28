@@ -234,6 +234,11 @@ def dashboard(st: State, f: dict) -> dict:
     ages = [days_between(c["receivedOn"], today) for c in scoped]
     decided = [d for d in st.decisions if d["decision"] != "request_further_review"]
     unit_name = {u["code"]: u["name"] for u in st.units}
+    ageing_by_unit: dict[str, dict[str, Any]] = {}
+    for c in open_:
+        row = ageing_by_unit.setdefault(c["ownerUnit"], {"overdue": 0, "buckets": [0] * len(L.AGEING)})
+        row["overdue"] += L.deadline_for(c, today)["state"] == "overdue"
+        row["buckets"][L.age_bucket(days_between(c["receivedOn"], today))] += 1
     return {
         **s,
         "weekly": weekly,
@@ -244,9 +249,7 @@ def dashboard(st: State, f: dict) -> dict:
         "totalCases": len(scoped),
         "pipeline": [{"stage": stg, "count": sum(1 for c in scoped if c["lifecycle"] == stg)} for stg in ["received", "under_examination", "awaiting_party", "inspection_hearing", "escalated"]],
         "workloadAgeing": [{
-            "unit": w["unit"], "name": unit_name.get(w["unit"], w["unit"]), "open": w["open"],
-            "overdue": sum(1 for c in open_ if c["ownerUnit"] == w["unit"] and L.deadline_for(c, today)["state"] == "overdue"),
-            "buckets": [sum(1 for c in open_ if c["ownerUnit"] == w["unit"] and L.age_bucket(days_between(c["receivedOn"], today)) == i) for i in range(len(L.AGEING))],
+            "unit": w["unit"], "name": unit_name.get(w["unit"], w["unit"]), "open": w["open"], **ageing_by_unit.get(w["unit"], {"overdue": 0, "buckets": [0] * len(L.AGEING)}),
         } for w in s["workload"]],
         "coordination": {
             "byType": [{"type": t, "count": sum(1 for d in decided if d["decision"] == t)} for t in DECISION_LABEL],
@@ -829,7 +832,13 @@ def institution_detail(st: State, iid: str) -> dict:
         "issue": (main_issue(active) or {}).get("label"),
         "stories": [{"id": a["id"], "story": overlap_story([st.case(x) for x in a["caseIds"]]), "decided": st.settled(a["id"])} for a in live],
         "replies": [], "watchers": [], "watching": False,
+        **_requests_of(st, iid),
     }
+
+
+def _requests_of(st: State, iid: str) -> dict:
+    from .letters_service import register_for  # what every unit has asked this institution for
+    return register_for(st, iid)
 
 
 # ---------------------------------------------------------------- overlaps, decisions, tasks
@@ -1304,6 +1313,8 @@ def run_sweep(st: State, trigger: str, actor: str = "Ekatra (automatic)") -> dic
     for t in db.scalars(select(m.Task).where(m.Task.state == "open")).all():
         if days_between(t.due_on, today) > 0:
             want[f"task:{t.id}"] = {"case_id": None, "owner_unit": t.owner_unit, "kind": "task_overdue", "ref": t.alert_id, "message": f"Follow-up overdue for {t.owner_unit}: {t.action}"}
+    from .letters_service import sweep_alerts  # replies institutions owe to a unit
+    want.update(sweep_alerts(st))
     for a in st.alerts():
         if st.settled(a["id"]):
             continue

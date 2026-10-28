@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useUser } from '../hooks/useUser'
 import { api, EXTRA } from '../lib/api'
 import CaseLanes from '../components/CaseLanes'
+import InstitutionRequests from '../components/InstitutionRequests'
 import InstitutionHub from '../components/InstitutionHub'
 import { Button, DeadlineBadge, ErrorBox, PANEL_BLEED, Panel, SeverityMark, Skeleton, StatusBadge, btn, fmtDate } from '../components/ui'
 import { UnitKey, UnitPill } from '../components/Unit'
@@ -89,6 +90,8 @@ export default function Institution() {
               <div className="pt-5"><CaseLanes lanes={i.lanes} today={api.today} highlight={i.alerts.filter((a) => !a.decided).length ? i.lanes.filter((l) => !l.end).map((l) => l.id) : []} legend /></div>
             </details>
           </Panel>
+
+          <InstitutionRequests id={i.id} />
 
           <Panel title="All cases on record" note="Including closed and transferred cases.">
             <div className={`${PANEL_BLEED} overflow-x-auto`}>

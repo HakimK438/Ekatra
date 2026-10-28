@@ -22,7 +22,7 @@ def test_frontend_copy_of_the_rules_table_is_identical():
 
 
 def test_defaults_are_served_and_verified_limits_are_locked(as_user):
-    c = as_user("ishaikh")
+    c = as_user("vjoshi")
     s = c.get("/api/v1/settings").json()
     cp = next(i for i in s["items"] if i["key"] == "cpgramsDays")
     assert (cp["current"], cp["verified"], cp["editable"], cp["changed"]) == (21, True, False, False)
@@ -33,7 +33,7 @@ def test_defaults_are_served_and_verified_limits_are_locked(as_user):
 
 
 def test_admin_change_takes_effect_everywhere_and_is_audited(as_user):
-    c = as_user("ishaikh")
+    c = as_user("vjoshi")
     assert non_cpgrams_days(c) == 30
     s = put(c, {"defaultDays": 45, "approachingPct": 80}).json()
     assert s["values"]["defaultDays"] == 45 and s["values"]["approachingPct"] == 0.8
@@ -48,7 +48,7 @@ def test_admin_change_takes_effect_everywhere_and_is_audited(as_user):
 
 
 def test_bad_values_are_refused_with_a_reason_to_fix(as_user):
-    c = as_user("ishaikh")
+    c = as_user("vjoshi")
     assert put(c, {"defaultDays": 0}).status_code == 400
     assert put(c, {"defaultDays": 12.5}).status_code == 400
     assert put(c, {"nonsense": 3}).status_code == 400
@@ -64,7 +64,7 @@ def test_only_administrators_can_change_rules(as_user):
 
 
 def test_reset_puts_every_default_back(as_user):
-    c = as_user("ishaikh")
+    c = as_user("vjoshi")
     put(c, {"defaultDays": 45, "topN": 5})
     s = c.post("/api/v1/settings/rules/reset", json={"reason": "Back to defaults"}).json()
     assert s["values"]["defaultDays"] == 30 and s["values"]["topN"] == 3 and not any(i.get("changed") for i in s["items"])

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -63,22 +64,28 @@ def can_confirm_match(u: dict) -> bool:
 # ---------- Deadlines ----------
 def deadline_for(c: Case, today: str) -> dict:
     cp = c["channel"] == "CPGRAMS"
+    closed = c["lifecycle"] in ("disposed", "transferred")
     days = SETTINGS["cpgramsDays"] if cp else SETTINGS["defaultDays"]
-    age = days_between(c["receivedOn"], today)
-    due_on = add_days(c["receivedOn"], days)
+    return dict(_deadline(cp, c["receivedOn"], closed, today, days, SETTINGS["cpgramsInterimDay"], SETTINGS["approachingPct"]))
+
+
+@lru_cache(maxsize=16384)  # called several times per case per request; the answer depends only on these values
+def _deadline(cp: bool, received: str, closed: bool, today: str, days: int, interim_day: int, pct: float) -> dict:
+    age = days_between(received, today)
+    due_on = add_days(received, days)
     days_to_due = days_between(today, due_on)
     base = {
         "age": age, "days": days, "dueOn": due_on, "daysToDue": days_to_due,
-        "interimDay": SETTINGS["cpgramsInterimDay"] if cp else None,
+        "interimDay": interim_day if cp else None,
         "verified": cp,
         "basis": "Verified: DARPG guidelines 23 Aug 2024 (CPGRAMS cases only)" if cp else PROTOTYPE_LABEL,
     }
-    if c["lifecycle"] in ("disposed", "transferred"):
+    if closed:
         return {**base, "state": "closed", "interimDue": False}
-    interim_due = cp and SETTINGS["cpgramsInterimDay"] <= age <= SETTINGS["cpgramsDays"]
+    interim_due = cp and interim_day <= age <= days
     if age > days:
         state = "overdue"
-    elif age >= days * SETTINGS["approachingPct"]:
+    elif age >= days * pct:
         state = "approaching"
     else:
         state = "on_track"

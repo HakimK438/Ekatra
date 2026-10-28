@@ -28,7 +28,7 @@ for (const p of paths) {
   const name = p === '/' ? 'dashboard' : p.replace(/[^a-z0-9]+/gi, '_')
   const h1 = await page.$eval('h1', (e) => e.textContent).catch(() => '(no h1)')
   console.log(p.padEnd(22), '→', String(h1).slice(0, 60))
-  await page.screenshot({ path: `${OUT}/${user}_${name}.png`, fullPage: false })
+  await page.screenshot({ path: `${OUT}/${user}_${name}.png`, fullPage: !!process.env.FULL })
 }
 console.log(problems.length ? 'PROBLEMS:\n' + [...new Set(problems)].join('\n') : 'no console errors, no failed requests')
 await browser.close()

@@ -36,7 +36,7 @@ export const DEMO_USERS: (DemoUser & { title: string; username: string })[] = [
   { id: 'u4', username: 'pnair', name: 'Pradeep Nair', role: 'dealing_officer', unit: 'PGRC', title: 'Dealing Officer — Public Grievance Redressal Cell (PGRC)' },
   { id: 'u5', username: 'rdas', name: 'Ritu Das', role: 'senior_management', title: 'Senior Management (view only)' },
   { id: 'u6', username: 'kmenon', name: 'Kavya Menon', role: 'data_steward', title: 'Data Steward — Imports and Institution Records' },
-  { id: 'u7', username: 'ishaikh', name: 'Imran Shaikh', role: 'admin', title: 'System Administrator — Settings and Users' },
+  { id: 'u7', username: 'vjoshi', name: 'Vikram Joshi', role: 'admin', title: 'System Administrator — Settings and Users' },
 ]
 const who = (u: DemoUser) => u.name + (u.unit ? `, ${u.unit}` : '')
 

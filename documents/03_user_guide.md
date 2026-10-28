@@ -14,7 +14,7 @@ Open the website. Either type a username and the password, or click a demonstrat
 | `mkhan` | Coordinator | Every unit; decide any clash; confirm institution names; audit log |
 | `rdas` | Senior Management | Read-only: dashboard, reports, clashes, audit |
 | `kmenon` | Data Steward | Confirm institution names; import for any unit |
-| `ishaikh` | System Administrator | Settings, users, reset demo data |
+| `vjoshi` | System Administrator | Settings, users, reset demo data |
 
 Five wrong passwords lock an account for a short time.
 

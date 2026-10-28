@@ -2,6 +2,7 @@
 // own targets, and three charts, each titled with what to do about it. Detail for every number is one click away.
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import WorkCells from '../components/WorkCells'
 import { Link } from 'react-router-dom'
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { LineChart } from 'lucide-react'
@@ -59,6 +60,8 @@ export default function Management() {
           <Outcome label={`Overlaps decided within ${o.overlaps.targetDays} days`} value={o.overlaps.inTarget} total={o.overlaps.decided} note="Prototype target. Counted over every overlap that has a decision." />
           <Outcome label="Overlaps waiting past their decision date" value={s.overlaps.pastDue} total={s.overlaps.awaiting} good={s.overlaps.pastDue === 0} to="/overlaps" note={`${s.overlaps.awaiting} are waiting in all. Lower is better.`} />
         </section>
+
+        <WorkCells />
 
         <div className="grid gap-6 xl:grid-cols-2">
           <ChartPanel title="Open cases in each unit, by how long they have waited"

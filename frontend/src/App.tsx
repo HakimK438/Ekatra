@@ -29,6 +29,13 @@ const Management = lazy(() => import('./pages/Management'))
 const Calendar = lazy(() => import('./pages/Calendar'))
 const Demo = lazy(() => import('./pages/Demo'))
 const Reply = lazy(() => import('./pages/Reply'))
+const Letter = lazy(() => import('./pages/Letter'))
+const Requests = lazy(() => import('./pages/Requests'))
+const Policy = lazy(() => import('./pages/Policy'))
+const Radar = lazy(() => import('./pages/Radar'))
+const MyDay = lazy(() => import('./pages/MyDay'))
+const Allocation = lazy(() => import('./pages/Allocation'))
+const Team = lazy(() => import('./pages/Team'))
 
 const Loading = () => <div className="space-y-4" aria-busy="true"><Skeleton className="h-12 w-1/2" /><Skeleton className="h-72" /></div>
 const page = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
@@ -63,6 +70,13 @@ export default function App() {
         <Route path="calendar" element={page(<Calendar />)} />
         <Route path="demo" element={page(<Demo />)} />
         <Route path="flow" element={page(<Flow />)} />
+        <Route path="letters" element={page(<Letter />)} />
+        <Route path="requests" element={page(<Requests />)} />
+        <Route path="policy" element={page(<Policy />)} />
+        <Route path="radar" element={page(<Radar />)} />
+        <Route path="my-day" element={page(<MyDay />)} />
+        <Route path="allocation" element={page(<Allocation />)} />
+        <Route path="team" element={page(<Team />)} />
         <Route path="how-it-works" element={page(<HowItWorks />)} />
         <Route path="*" element={<Empty title="This page does not exist">Use the menu to find what you need.</Empty>} />
       </Route>
