@@ -1,11 +1,12 @@
-"""Database engine and session. Serverless-friendly: no connection pool (each request opens and closes its own)."""
+"""Database engine and session. Serverless-friendly: a tiny pool, so a warm function reuses its connection instead of paying
+the connect and TLS handshake on every request; pre-ping replaces a connection that died while the function was frozen."""
 from __future__ import annotations
 
 from collections.abc import Iterator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
-from sqlalchemy.pool import NullPool, StaticPool
+from sqlalchemy.pool import StaticPool
 
 from .config import settings
 
@@ -21,7 +22,8 @@ def make_engine(url: str | None = None):
         if ":memory:" in url:
             kwargs["poolclass"] = StaticPool  # one shared in-memory database (tests)
         return create_engine(url, **kwargs)
-    return create_engine(url, poolclass=NullPool, pool_pre_ping=True)
+    # prepare_threshold=None: no server-side prepared statements, which a reused connection behind the Neon pooler can trip on
+    return create_engine(url, connect_args={"prepare_threshold": None}, pool_size=1, max_overflow=4, pool_recycle=240, pool_pre_ping=True)
 
 
 engine = make_engine()
