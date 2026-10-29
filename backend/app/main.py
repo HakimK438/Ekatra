@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 
 from .errors import ApiError
 from .routes import router
+from .upgrade import upgrade_old_database
 
 log = logging.getLogger("ekatra")
 if not log.handlers:
@@ -20,6 +21,11 @@ if not log.handlers:
     h.setFormatter(logging.Formatter("%(message)s"))
     log.addHandler(h)
     log.setLevel(logging.INFO)
+
+try:
+    upgrade_old_database()
+except Exception:  # the API must still start; the screens that need the new table will show their error
+    log.exception("Database upgrade on start failed")
 
 app = FastAPI(title="Ekatra API", version="1.0.0", docs_url="/api/docs", openapi_url="/api/openapi.json",
               description="Coordination index for institution-related cases. Prototype with synthetic data. Not an official AICTE system.")
